@@ -1,0 +1,208 @@
+Advanced Python - Shared Clipboard
+
+This Page URL is: http://dhrona.net/p/apy
+
+NOTE: Please do NOT cut (Ctrl-x) by selecting text below. 
+Kindly use Copy-Paste (Ctrl-c / Ctrl-v).
+
+----------------------------------------------------------------- 
+Contact me for any doubts/clarifications after training sessions:
+
+    Chandrashekar Babu 
+
+    Email: <training@chandrashekar.info>
+
+
+    Website: http://www.chandrashekar.info/contact.html
+
+
+    LinkedIn: http://in.linkedin.com/in/chandrashekarbabu/en
+
+
+    Phone: 9884386075 (<8:00 AM | >7:00 PM)
+
+------------------------------------------------------------------
+Python tutorials:
+    https://docs.python.org/3/
+    https://www.diveinto.org/python3/
+    https://python.swaroopch.com/
+    https://realpython.com/
+    https://greenteapress.com/wp/think-python/
+    https://www.learnpythonthehardway.org/
+Blogs:
+    http://simeonfranklin.com/blog/  [Generators, Decorators]
+    https://jeffknupp.com/
+    http://www.laurentluce.com/
+    
+    
+People to follow:
+    Raymond Hettinger (twitter: @raymondh)
+    David Beazley (twitter: @dabeaz)
+    Dan Bader (twitter: @dbader_org)
+    Guido Van Rossum (twitter: @gvanrossum)
+
+YouTube:
+    Raymond Hettinger's talks and videos
+    https://www.youtube.com/playlist?list=PLRVdut2KPAguz3xcd22i_o_onnmDKj3MA
+    
+    David Beazley's talks and videos
+    https://www.youtube.com/user/dabeazllc/videos
+
+Other sites:
+    https://awesome-python.com/
+    http://www.realpython.com/
+    http://pymotw.com/
+
+-----------------------------------------------------
+VS Code Live Share URL: https://prod.liveshare.vsengsaas.visualstudio.com/join?87FB2EA0049BBBB4564889FC2822BC7B1D3A
+https://prod.liveshare.vsengsaas.visualstudio.com/join?87FB2EA0049BBBB4564889FC2822BC7B1D3A
+"""
+Create tasklet module and implement the
+Tasklet class in the same such that the
+following code generate the output as
+below:
+
+  $ python tasklet_exercise.py
+    foo(): counting 0
+    bar(): counting 0
+    foo(): counting 1
+    bar(): counting 1
+    foo(): counting 2
+    bar(): counting 2
+    foo(): counting 3
+    bar(): counting 3
+    foo(): counting 4
+    bar(): counting 4
+"""
+from tasklet import Tasklet
+
+tasks = Tasklet()
+
+@tasks.add
+def foo():
+    for i in range(5):
+        print("foo(): counting", i)
+        yield
+
+@tasks.add
+def bar():
+    for i in range(5):
+        print("bar(): counting", i)
+        yield
+
+tasks.schedule()
+
+#---------------
+from time import sleep
+
+def foo():
+    for i in range(10):
+        print("Foo: counting", i)
+        yield
+        sleep(1)
+
+def bar():
+    for i in range(10):
+        print("Bar: counting", i)
+        yield
+        sleep(1)
+
+if __name__ == '__main__':
+    t1 = foo()
+    t2 = bar()
+    tasks = [t1, t2]
+
+    while tasks:
+        for t in tasks:
+            try:
+                next(t)
+            except StopIteration:
+                tasks.remove(t)
+
+#---- tasklet.py ----
+class Tasklet:
+    def __init__(self):
+        from collections import deque
+        self.tasks = deque()
+
+    def add(self, fn):
+        g = fn()
+        self.tasks.append(g)
+
+    def schedule(self):
+        while self.tasks:
+            t = self.tasks[0]
+            try:
+                next(t)
+            except StopIteration:
+                self.tasks.popleft()
+            else:
+                self.tasks.rotate(-1)
+
+    def schedule_old(self):
+        while self.tasks:
+            for t in self.tasks:
+                try:
+                    next(t)
+                except StopIteration:
+                    self.tasks.remove(t)
+
+#---- thread_oo.py
+from threading import Thread
+from time import sleep
+
+class MyThread(Thread):
+    def __init__(self, count, *args, **kwargs):
+        #Thread.__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
+        self.count = count
+    def run(self):
+        for i in range(self.count):
+            print(f"{self.name} counting {i}")
+            sleep(1)
+
+t1 = MyThread(name="foo", count=20, daemon=True)
+t2 = MyThread(name="bar", count=10)
+
+#t1.daemon = True
+
+t1.start()
+t2.start()
+
+for i in range(5):
+    print(f"In main: counting {i}")
+    sleep(1)
+    
+#--- thread_join2.py
+from time import sleep
+from threading import Thread
+
+def foo():
+    for i in range(10):
+        print("Foo: counting", i)
+        sleep(1)
+
+def bar():
+    for i in range(5):
+        print("Bar: counting", i)
+        sleep(1)
+
+def joinall(threads):
+    pass
+
+if __name__ == '__main__':
+    t1 = Thread(target=foo)
+    t2 = Thread(target=bar)
+
+    t1.start()
+    t2.start()
+    joinall([t1, t2])
+
+    tasks = [t1, t2]
+    while tasks:
+        for t in tasks:
+            t.join(0.5)
+            if not t.is_alive():
+                print(t, "completed...")
+                tasks.remove(t)
+

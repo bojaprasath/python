@@ -1,0 +1,8 @@
+<a href="{% url 'home' %}"> Goto Homepage</a>
+<h1>Input : {{ fulltext }} </h1>
+<h1>No of Words : {{ count }} </h1>
+<h1>Word count : </h1>
+{% for word,total in word_dict %}
+{{ word }} : {{ total }}
+</br>
+{% endfor %}

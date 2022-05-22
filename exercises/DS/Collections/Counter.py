@@ -1,0 +1,11 @@
+from collections import Counter
+text1 = Counter('abcd')
+text2 = Counter('bcda')
+text3 = Counter('asdbcadasd')
+print(text1)
+print(text2)
+print(text3)
+print(text1 == text2)
+print(text1 == text3)
+text1.update('asdasdas')
+print(text1)
